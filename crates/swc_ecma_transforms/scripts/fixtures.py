@@ -28,38 +28,35 @@ for f in files:
     if file_type == 'exec.mjsz':
         file_type = 'exec.js'
 
-    if not test_name in fm:
+    if test_name not in fm:
         fm[test_name] = {}
     with open(name, "r") as f:
         fm[test_name][file_type] = f.read()
 
 
-for name in fm:
-    m = fm[name]
+for name, m in fm.items():
     name = name.replace('-', '_')
 
     print()
-    print('// {}'.format(name))
+    print(f'// {name}')
     if 'exec.js' in m:
         if 'options.json' in m:
-            print('test_exec!(syntax(), |_| tr(r#"{}"#), {}_exec, r#"\n{}\n"#);'.format(
-                m['options.json'],name, m['exec.js']
-            ))
+            print(
+                f"""test_exec!(syntax(), |_| tr(r#"{m['options.json']}"#), {name}_exec, r#"\n{m['exec.js']}\n"#);"""
+            )
         else:
-            print('test_exec!(syntax(), |_| tr(Default::default()), {}_exec, r#"\n{}\n"#);'.format(
-                name, m['exec.js']
-            ))
+            print(
+                f"""test_exec!(syntax(), |_| tr(Default::default()), {name}_exec, r#"\n{m['exec.js']}\n"#);"""
+            )
     elif 'input.js' in m and 'output.js' in m:
         if 'options.json' in m:
-            print('test!(syntax(),|_| tr(r#"{}"#), {}, r#"\n{}\n"#, r#"\n{}\n"#);'.format(
-                m['options.json'], name, m['input.js'], m['output.js']
-            ))
+            print(
+                f"""test!(syntax(),|_| tr(r#"{m['options.json']}"#), {name}, r#"\n{m['input.js']}\n"#, r#"\n{m['output.js']}\n"#);"""
+            )
         else:
-            print('test!(syntax(),|_| tr(Default::default()), {}, r#"\n{}\n"#, r#"\n{}\n"#);'.format(
-                name, m['input.js'], m['output.js']
-            ))
-    elif 'stdout.txt' in m:
-        pass
-    else:
+            print(
+                f"""test!(syntax(),|_| tr(Default::default()), {name}, r#"\n{m['input.js']}\n"#, r#"\n{m['output.js']}\n"#);"""
+            )
+    elif 'stdout.txt' not in m:
         print(m.keys())
         raise Exception(name, m)
